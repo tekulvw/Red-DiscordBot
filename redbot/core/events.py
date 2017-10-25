@@ -12,10 +12,11 @@ from discord.ext import commands
 from .data_manager import storage_type
 from .utils.chat_formatting import inline, bordered
 from .core_commands import find_spec
-from colorama import Fore, Style
+from colorama import Fore, Style, init
 
 log = logging.getLogger("red")
 sentry_log = logging.getLogger("red.sentry")
+init()
 
 INTRO = """
 ______         _           ______ _                       _  ______       _   
