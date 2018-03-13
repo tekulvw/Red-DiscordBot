@@ -16,7 +16,7 @@ __author__ = ["aikaterna", "billy/bollo/ati"]
 class Audio:
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, 2711759129, force_registration=True)
+        self.config = Config.get_conf(self, 2711759130, force_registration=True)
 
         default_global = {
             "host": 'localhost',
