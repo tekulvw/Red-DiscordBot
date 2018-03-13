@@ -10,7 +10,7 @@ from redbot.core.data_manager import cog_data_path
 
 LAVALINK_BUILD_ID_URL = (
     "https://ci.fredboat.com/app/rest/buildTypes/"
-    "id:Lavalink_Build/builds/status:SUCCESS/number"
+    "id:Lavalink_Build/builds/status:SUCCESS/number?guest=1"
 )
 LAVALINK_BUILD_URL = (
     "https://ci.fredboat.com/guestAuth/repository/"
