@@ -10,7 +10,7 @@ import sys
 import discord
 
 import redbot.logging
-from redbot.core.bot import Red, ExitCodes
+from redbot.core.bot import Red, RedUser, ExitCodes
 from redbot.core.cog_manager import CogManagerUI
 from redbot.core.json_io import JsonIO
 from redbot.core.global_checks import init_global_checks
@@ -104,7 +104,11 @@ def main():
     log.debug("Data Path: %s", data_manager._base_data_path())
     log.debug("Storage Type: %s", data_manager.storage_type())
 
-    red = Red(cli_flags=cli_flags, description=description, dm_help=None)
+    bot_class = Red
+    if cli_flags.user:
+        bot_class = RedUser
+
+    red = bot_class(cli_flags=cli_flags, description=description, dm_help=None)
     init_global_checks(red)
     init_events(red, cli_flags)
     red.add_cog(Core(red))
@@ -138,7 +142,7 @@ def main():
         loop.run_until_complete(red.http.close())
         sys.exit(0)
     try:
-        loop.run_until_complete(red.start(token, bot=True))
+        loop.run_until_complete(red.start(token, bot=not cli_flags.user))
     except discord.LoginFailure:
         log.critical("This token doesn't seem to be valid.")
         db_token = loop.run_until_complete(red.db.token())

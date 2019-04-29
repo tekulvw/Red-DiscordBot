@@ -464,6 +464,40 @@ class Red(RedBase, discord.AutoShardedClient):
         await self.logout()
 
 
+class RedUser(RedBase, discord.Client):
+    def __init__(self, *args, cli_flags=None, **kwargs):
+        super().__init__(*args, cli_flags=cli_flags, **kwargs)
+        self.is_user = cli_flags.user
+
+    async def is_owner(self, user):
+        if self.is_user and user.id == self.user.id:
+            return True
+        elif user.id in self._co_owners:
+            return True
+        elif not self.is_user:
+            return await super().is_owner(user)
+        return False
+
+    async def shutdown(self, *, restart: bool = False):
+        """Gracefully quit Red.
+
+        The program will exit with code :code:`0` by default.
+
+        Parameters
+        ----------
+        restart : bool
+            If :code:`True`, the program will exit with code :code:`26`. If the
+            launcher sees this, it will attempt to restart the bot.
+
+        """
+        if not restart:
+            self._shutdown_mode = ExitCodes.SHUTDOWN
+        else:
+            self._shutdown_mode = ExitCodes.RESTART
+
+        await self.logout()
+
+
 class ExitCodes(Enum):
     CRITICAL = 1
     SHUTDOWN = 0
