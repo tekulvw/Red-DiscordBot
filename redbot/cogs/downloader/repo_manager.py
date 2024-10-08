@@ -5,14 +5,14 @@ import functools
 import keyword
 import os
 import pkgutil
+import re
 import shlex
 import shutil
-import re
-import yarl
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from subprocess import run as sp_run, PIPE, CompletedProcess
 from string import Formatter
+from subprocess import PIPE, CompletedProcess
+from subprocess import run as sp_run
 from sys import executable
 from typing import (
     Any,
@@ -28,9 +28,11 @@ from typing import (
 )
 
 import discord
-from redbot.core import data_manager, commands, Config
-from redbot.core.utils._internal_utils import safe_delete
+import yarl
+
+from redbot.core import Config, commands, data_manager
 from redbot.core.i18n import Translator
+from redbot.core.utils._internal_utils import safe_delete
 
 from . import errors
 from .installable import Installable, InstallableType, InstalledModule
@@ -52,9 +54,7 @@ class Candidate(NamedTuple):
     description: str
 
 
-class _RepoCheckoutCtxManager(
-    Awaitable[None], AsyncContextManager[None]
-):  # pylint: disable=duplicate-bases
+class _RepoCheckoutCtxManager(Awaitable[None], AsyncContextManager[None]):  # pylint: disable=duplicate-bases
     def __init__(
         self,
         repo: Repo,
@@ -986,9 +986,9 @@ class Repo(RepoJSONMixin):
 
         if p.returncode != 0:
             log.error(
-                "Something went wrong when installing"
-                " the following requirements:"
-                " {}".format(", ".join(requirements))
+                "Something went wrong when installing" " the following requirements:" " {}".format(
+                    ", ".join(requirements)
+                )
             )
             return False
         return True

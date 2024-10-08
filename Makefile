@@ -31,11 +31,11 @@ export HELP_BODY
 
 # Python Code Style
 reformat:
-	$(VENV_PYTHON) -m black $(ROOT_DIR)
+	$(VENV_PYTHON) -m ruff format $(ROOT_DIR)
 stylecheck:
-	$(VENV_PYTHON) -m black --check $(ROOT_DIR)
+	$(VENV_PYTHON) -m ruff check $(ROOT_DIR)
 stylediff:
-	$(VENV_PYTHON) -m black --check --diff $(ROOT_DIR)
+	$(VENV_PYTHON) -m ruff check --diff $(ROOT_DIR)
 
 # Translations
 gettext:

@@ -25,8 +25,8 @@ OTHER_MENTION_RE = re.compile(r"(<)(@[!&]?|#)(\d+>)")
 SMART_QUOTE_REPLACEMENT_DICT = {
     "\u2018": "'",  # Left single quote
     "\u2019": "'",  # Right single quote
-    "\u201C": '"',  # Left double quote
-    "\u201D": '"',  # Right double quote
+    "\u201c": '"',  # Left double quote
+    "\u201d": '"',  # Right double quote
 }
 
 SMART_QUOTE_REPLACE_RE = re.compile("|".join(SMART_QUOTE_REPLACEMENT_DICT.keys()))

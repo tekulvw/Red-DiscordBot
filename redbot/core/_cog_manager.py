@@ -6,20 +6,20 @@ import textwrap
 from importlib import import_module, invalidate_caches
 from importlib.machinery import ModuleSpec
 from pathlib import Path
-from typing import Union, List, Optional
+from typing import List, Optional, Union
+
+import discord
 
 import redbot.cogs
 from redbot.core.commands import positive_int
 from redbot.core.utils import deduplicate_iterables
 from redbot.core.utils.views import ConfirmView
-import discord
 
 from . import commands
 from .config import Config
-from .i18n import Translator, cog_i18n
 from .data_manager import cog_data_path, data_path
-
-from .utils.chat_formatting import box, pagify, humanize_list, inline
+from .i18n import Translator, cog_i18n
+from .utils.chat_formatting import box, humanize_list, inline, pagify
 
 __all__ = ("CogManager", "CogManagerUI")
 

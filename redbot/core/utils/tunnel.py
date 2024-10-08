@@ -1,10 +1,13 @@
 import asyncio
-import discord
-from datetime import datetime
-from redbot.core.utils.chat_formatting import pagify
-import io
 import weakref
+from datetime import datetime
+from http import HTTPStatus
 from typing import List, Optional, Union
+
+import discord
+
+from redbot.core.utils.chat_formatting import pagify
+
 from .common_filters import filter_mass_mentions
 
 __all__ = ("Tunnel",)
@@ -172,7 +175,11 @@ class Tunnel(metaclass=TunnelMeta):
                     file = await a.to_file()
                 except discord.HTTPException as e:
                     # this is required, because animated webp files aren't cached
-                    if not (e.status == 415 and images_only and use_cached):
+                    if not (
+                        e.status == int(HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+                        and images_only
+                        and use_cached
+                    ):
                         raise
                 else:
                     files.append(file)

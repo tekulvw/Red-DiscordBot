@@ -1,29 +1,25 @@
-from redbot import _early_init
-
-# this needs to be called as early as possible
-_early_init()
-
 import asyncio
 import json
 import logging
-import sys
 import re
+import sys
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
+from typing import Any, Dict, Optional
 
 import click
 
-from redbot.core._cli import confirm
-from redbot.core.utils._internal_utils import (
-    safe_delete,
-    create_backup as red_create_backup,
-    cli_level_to_log_level,
-)
-from redbot.core import config, data_manager, _drivers
-from redbot.core._cli import ExitCodes
+from redbot.core import _drivers, config, data_manager
+from redbot.core._cli import ExitCodes, confirm
+from redbot.core._drivers import BackendType
 from redbot.core.data_manager import appdir, config_dir, config_file
-from redbot.core._drivers import BackendType, IdentifierData
+from redbot.core.utils._internal_utils import (
+    cli_level_to_log_level,
+    safe_delete,
+)
+from redbot.core.utils._internal_utils import (
+    create_backup as red_create_backup,
+)
 
 conversion_log = logging.getLogger("red.converter")
 

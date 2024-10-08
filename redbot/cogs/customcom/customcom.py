@@ -1,8 +1,8 @@
 import asyncio
-import re
 import random
+import re
 from datetime import datetime, timedelta
-from typing import Iterable, List, Mapping, Tuple, Dict, Set, Literal, Union
+from typing import Dict, Iterable, List, Literal, Mapping, Set, Tuple, Union
 from urllib.parse import quote_plus
 
 import discord
@@ -11,8 +11,8 @@ import rapidfuzz
 from redbot.core import Config, commands
 from redbot.core.commands import Parameter
 from redbot.core.i18n import Translator, cog_i18n
-from redbot.core.utils import menus, AsyncIter
-from redbot.core.utils.chat_formatting import box, pagify, escape, humanize_list
+from redbot.core.utils import AsyncIter, menus
+from redbot.core.utils.chat_formatting import box, escape, humanize_list, pagify
 from redbot.core.utils.predicates import MessagePredicate
 
 _ = Translator("CustomCommands", __file__)
@@ -466,9 +466,12 @@ class CustomCommands(commands.Cog):
                 return await ctx.send(_("That command doesn't exist."))
             if cooldowns:
                 cooldown = []
-                for per, rate in cooldowns.items():
+                for cooldown_target, rate in cooldowns.items():
                     cooldown.append(
-                        _("A {} may call this command every {} seconds").format(per, rate)
+                        _("A {} may call this command every {} seconds").format(
+                            cooldown_target,
+                            rate,
+                        )
                     )
                 return await ctx.send("\n".join(cooldown))
             else:

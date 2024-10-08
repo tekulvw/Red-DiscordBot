@@ -1,11 +1,12 @@
 import logging
-from datetime import timezone
 from collections import defaultdict, deque
 from typing import List, Optional
 
 import discord
-from redbot.core import i18n, modlog, commands
+
+from redbot.core import commands, i18n, modlog
 from redbot.core.utils.mod import is_mod_or_superior
+
 from .abc import MixinMeta
 
 _ = i18n.Translator("Mod", __file__)

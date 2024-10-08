@@ -2,14 +2,12 @@ import contextlib
 import math
 import time
 from pathlib import Path
-
 from typing import MutableMapping
 
 import discord
 import lavalink
-from red_commons.logging import getLogger
-
 from lavalink import NodeNotFound
+from red_commons.logging import getLogger
 
 from redbot.core import commands
 from redbot.core.commands import UserInputOptional
@@ -743,7 +741,7 @@ class PlayerCommands(MixinMeta, metaclass=CompositeMetaClass):
                     title=_("Unable To Play Tracks"),
                     description=_("That track is not allowed."),
                 )
-            if query.invoked_from == "search list" or query.invoked_from == "local folder":
+            if query.invoked_from in ("search list", "local folder"):
                 if query.invoked_from == "search list" and not query.is_local:
                     try:
                         result, called_api = await self.api_interface.fetch_track(

@@ -1,13 +1,13 @@
+import json
+import shutil
+import subprocess as sp
 from collections import namedtuple
 from pathlib import Path
-import json
-import subprocess as sp
-import shutil
 
 import pytest
 
-from redbot.cogs.downloader.repo_manager import RepoManager, Repo, ProcessFormatter
 from redbot.cogs.downloader.installable import Installable, InstalledModule
+from redbot.cogs.downloader.repo_manager import Repo, RepoManager
 
 __all__ = [
     "GIT_VERSION",
@@ -174,7 +174,7 @@ async def _session_git_repo(tmp_path_factory, event_loop):
     return_code = fast_import.wait()
     if return_code:
         raise Exception(f"git fast-import failed with code {return_code}")
-    sp.run((*git_dirparams, "reset", "--hard"))
+    sp.run((*git_dirparams, "reset", "--hard"), check=False)
     return repo
 
 

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import datetime, timedelta
 from typing import Optional, TypedDict
-from datetime import timedelta, datetime, timezone
-from typing_extensions import Annotated
 
 from discord.ext.commands.converter import Converter
-from redbot.core import commands
-from redbot.core import i18n
+from typing_extensions import Annotated
+
+from redbot.core import commands, i18n
 from redbot.core.commands.converter import TIME_RE
 
 _ = i18n.Translator("Mutes", __file__)

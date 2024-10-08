@@ -2,7 +2,6 @@ import argparse
 import functools
 import re
 from pathlib import Path
-
 from typing import Final, MutableMapping, Optional, Pattern, Tuple, Union
 
 import discord
@@ -30,29 +29,33 @@ __all__ = [
 ]
 
 T_ = _
-_ = lambda s: s
+
+
+def _(s):
+    return s
+
 
 _SCOPE_HELP: Final[str] = _(
     """
 Scope must be a valid version of one of the following:
-​ ​ ​ ​ Global
-​ ​ ​ ​ Guild
-​ ​ ​ ​ User
+\u200b \u200b \u200b \u200b Global
+\u200b \u200b \u200b \u200b Guild
+\u200b \u200b \u200b \u200b User
 """
 )
 _USER_HELP: Final[str] = _(
     """
 Author must be a valid version of one of the following:
-​ ​ ​ ​ User ID
-​ ​ ​ ​ User Mention
-​ ​ ​ ​ User Name#123
+\u200b \u200b \u200b \u200b User ID
+\u200b \u200b \u200b \u200b User Mention
+\u200b \u200b \u200b \u200b User Name#123
 """
 )
 _GUILD_HELP: Final[str] = _(
     """
 Guild must be a valid version of one of the following:
-​ ​ ​ ​ Guild ID
-​ ​ ​ ​ Exact guild name
+\u200b \u200b \u200b \u200b Guild ID
+\u200b \u200b \u200b \u200b Exact guild name
 """
 )
 
@@ -114,7 +117,7 @@ async def global_unique_user_finder(
 
     maybe_matches = []
     async for user in AsyncIter(bot.users).filter(
-        lambda u: u.name == arg or u.global_name == arg or f"{u}" == arg
+        lambda u: arg in (u.name, u.global_name, f"{u}")
     ):
         maybe_matches.append(user)
 

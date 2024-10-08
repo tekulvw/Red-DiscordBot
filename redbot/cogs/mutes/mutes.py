@@ -7,20 +7,20 @@ from typing import Dict, List, Literal, Optional, Tuple, Union, cast
 
 import discord
 
+from redbot.core import Config, commands, i18n, modlog
 from redbot.core.bot import Red
-from redbot.core import commands, i18n, modlog, Config
 from redbot.core.utils import AsyncIter, bounded_gather, can_user_react_in
 from redbot.core.utils.chat_formatting import (
     bold,
-    humanize_timedelta,
     humanize_list,
+    humanize_timedelta,
     inline,
     pagify,
 )
-from redbot.core.utils.mod import get_audit_reason
 from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.views import SimpleMenu
+from redbot.core.utils.mod import get_audit_reason
 from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
+from redbot.core.utils.views import SimpleMenu
 
 from .converters import MuteTime
 from .models import ChannelMuteResponse, MuteResponse
@@ -28,7 +28,10 @@ from .voicemutes import VoiceMutes
 
 T_ = i18n.Translator("Mutes", __file__)
 
-_ = lambda s: s
+
+def _(s):
+    return s
+
 
 MUTE_UNMUTE_ISSUES = {
     "already_muted": _("That user is already muted in {location}."),
@@ -278,7 +281,7 @@ class Mutes(VoiceMutes, commands.Cog, metaclass=CompositeMetaClass):
 
             if task.done():
                 try:
-                    r = task.result()
+                    task.result()
                 except Exception as exc:
                     log.error("An unexpected error occurred in the unmute task", exc_info=exc)
                 self._unmute_tasks.pop(task_id, None)

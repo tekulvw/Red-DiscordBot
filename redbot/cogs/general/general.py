@@ -1,22 +1,24 @@
 import datetime
 import time
-from enum import Enum
-from random import randint, choice
-from typing import Final
 import urllib.parse
+from enum import Enum
+from random import choice, randint
+from typing import Final
+
 import aiohttp
 import discord
+
 from redbot.core import commands
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator, cog_i18n
-from redbot.core.utils.menus import menu
 from redbot.core.utils.chat_formatting import (
     bold,
     escape,
-    italics,
     humanize_number,
     humanize_timedelta,
+    italics,
 )
+from redbot.core.utils.menus import menu
 
 _ = T_ = Translator("General", __file__)
 
@@ -47,8 +49,6 @@ MAX_ROLL: Final[int] = 2**63 - 1
 class General(commands.Cog):
     """General commands."""
 
-    global _
-    _ = lambda s: s
     ball = [
         _("As I see it, yes"),
         _("It is certain"),
@@ -71,7 +71,6 @@ class General(commands.Cog):
         _("Outlook not so good"),
         _("Very doubtful"),
     ]
-    _ = T_
 
     def __init__(self, bot: Red) -> None:
         super().__init__()

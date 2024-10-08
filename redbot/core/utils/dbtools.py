@@ -12,8 +12,7 @@ __all__ = ["APSWConnectionWrapper"]
 # TODO (mikeshardmind): make this inherit typing_extensions.Protocol
 # long term: mypy; short term: removing the pylint disables below
 class ProvidesCursor:
-    def cursor(self) -> apsw.Cursor:
-        ...
+    def cursor(self) -> apsw.Cursor: ...
 
 
 class ContextManagerMixin(ProvidesCursor):

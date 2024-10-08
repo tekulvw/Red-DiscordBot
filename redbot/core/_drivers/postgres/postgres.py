@@ -2,7 +2,7 @@ import getpass
 import json
 import sys
 from pathlib import Path
-from typing import Optional, Any, AsyncIterator, Tuple, Union, Callable, List
+from typing import Any, AsyncIterator, Callable, List, Optional, Tuple, Union
 
 try:
     # pylint: disable=import-error
@@ -10,8 +10,8 @@ try:
 except ModuleNotFoundError:
     asyncpg = None
 
-from ... import data_manager, errors
-from ..base import BaseDriver, IdentifierData, ConfigCategory
+from ... import errors
+from ..base import BaseDriver, ConfigCategory, IdentifierData
 from ..log import log
 
 __all__ = ["PostgresDriver"]
@@ -166,7 +166,7 @@ class PostgresDriver(BaseDriver):
     ) -> Union[int, float]:
         try:
             return await self._execute(
-                f"SELECT red_config.inc($1, $2, $3)",
+                "SELECT red_config.inc($1, $2, $3)",
                 encode_identifier_data(identifier_data),
                 value,
                 default,

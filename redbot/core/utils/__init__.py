@@ -1,18 +1,20 @@
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
-from asyncio import as_completed, Semaphore
+from asyncio import Semaphore, as_completed
 from asyncio.futures import isfuture
 from itertools import chain
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
-    AsyncIterator,
     AsyncIterable,
+    AsyncIterator,
     Awaitable,
     Callable,
+    Generator,
     Iterable,
     Iterator,
     List,
@@ -22,8 +24,6 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    Generator,
-    Coroutine,
     overload,
 )
 
@@ -225,8 +225,7 @@ def bounded_gather_iter(
         if isfuture(cof) and cof._loop is not loop:
             raise ValueError("futures are tied to different event loops")
 
-        cof = _sem_wrapper(semaphore, cof)
-        pending.append(cof)
+        pending.append(_sem_wrapper(semaphore, cof))
 
     return as_completed(pending)
 
@@ -258,8 +257,6 @@ def bounded_gather(
     TypeError
         When invalid parameters are passed
     """
-    loop = asyncio.get_running_loop()
-
     if semaphore is None:
         if not isinstance(limit, int) or limit <= 0:
             raise TypeError("limit must be an int > 0")
@@ -653,18 +650,17 @@ def get_end_user_data_statement_or_raise(file: Union[Path, str]) -> str:
 @overload
 def can_user_send_messages_in(
     obj: discord.abc.User, messageable: discord.PartialMessageable, /
-) -> NoReturn:
-    ...
+) -> NoReturn: ...
 
 
 @overload
-def can_user_send_messages_in(obj: discord.Member, messageable: GuildMessageable, /) -> bool:
-    ...
+def can_user_send_messages_in(obj: discord.Member, messageable: GuildMessageable, /) -> bool: ...
 
 
 @overload
-def can_user_send_messages_in(obj: discord.User, messageable: DMMessageable, /) -> Literal[True]:
-    ...
+def can_user_send_messages_in(
+    obj: discord.User, messageable: DMMessageable, /
+) -> Literal[True]: ...
 
 
 def can_user_send_messages_in(
@@ -724,8 +720,7 @@ def can_user_send_messages_in(
     perms = channel.permissions_for(obj)
     if isinstance(channel, discord.Thread):
         return (
-            perms.send_messages_in_threads
-            and (not channel.locked or perms.manage_threads)
+            perms.send_messages_in_threads and (not channel.locked or perms.manage_threads)
             # For private threads, the only way to know if user can send messages would be to check
             # if they're a member of it which we cannot reliably do without an API request.
             #
@@ -776,18 +771,15 @@ def can_user_manage_channel(
 @overload
 def can_user_react_in(
     obj: discord.abc.User, messageable: discord.PartialMessageable, /
-) -> NoReturn:
-    ...
+) -> NoReturn: ...
 
 
 @overload
-def can_user_react_in(obj: discord.Member, messageable: GuildMessageable, /) -> bool:
-    ...
+def can_user_react_in(obj: discord.Member, messageable: GuildMessageable, /) -> bool: ...
 
 
 @overload
-def can_user_react_in(obj: discord.User, messageable: DMMessageable, /) -> Literal[True]:
-    ...
+def can_user_react_in(obj: discord.User, messageable: DMMessageable, /) -> Literal[True]: ...
 
 
 def can_user_react_in(obj: discord.abc.User, messageable: discord.abc.Messageable, /) -> bool:
@@ -845,8 +837,7 @@ def can_user_react_in(obj: discord.abc.User, messageable: discord.abc.Messageabl
     perms = channel.permissions_for(obj)
     if isinstance(channel, discord.Thread):
         return (
-            (perms.read_message_history and perms.add_reactions)
-            and not channel.archived
+            (perms.read_message_history and perms.add_reactions) and not channel.archived
             # For private threads, the only way to know if user can send messages would be to check
             # if they're a member of it which we cannot reliably do without an API request.
             #

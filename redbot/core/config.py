@@ -656,9 +656,9 @@ class Config(metaclass=ConfigMeta):
         self._defaults = defaults or {}
 
         self.custom_groups: Dict[str, int] = {}
-        self._lock_cache: MutableMapping[
-            IdentifierData, asyncio.Lock
-        ] = weakref.WeakValueDictionary()
+        self._lock_cache: MutableMapping[IdentifierData, asyncio.Lock] = (
+            weakref.WeakValueDictionary()
+        )
 
     @property
     def defaults(self):

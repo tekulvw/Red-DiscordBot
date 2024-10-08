@@ -1,29 +1,29 @@
 """Module for Trivia cog."""
+
 import asyncio
-import math
+import io
 import pathlib
 from collections import Counter
 from typing import Any, Dict, List, Literal, Union
-import schema
 
-import io
-import yaml
 import discord
+import yaml
 
-from redbot.core import Config, commands, bank
+import schema
+from redbot.core import Config, bank, commands
 from redbot.core.bot import Red
 from redbot.core.data_manager import cog_data_path
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils import AsyncIter, can_user_react_in
-from redbot.core.utils.chat_formatting import box, pagify, bold, inline, italics, humanize_number
+from redbot.core.utils.chat_formatting import bold, box, humanize_number, inline, italics, pagify
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
 
 from .checks import trivia_stop_check
 from .converters import finite_float
 from .log import LOG
-from .session import TriviaSession
 from .schema import TRIVIA_LIST_SCHEMA, format_schema_error
+from .session import TriviaSession
 
 __all__ = ("Trivia", "UNIQUE_ID", "InvalidListError", "get_core_lists", "get_list")
 
@@ -601,8 +601,8 @@ class Trivia(commands.Cog):
         # Put key last in reverse priority
         priority.append(key)
         items = data.items()
-        for key in priority:
-            items = sorted(items, key=lambda t: t[1][key], reverse=True)
+        for priority_key in priority:
+            items = sorted(items, key=lambda t: t[1][priority_key], reverse=True)
         max_name_len = max(map(lambda m: len(str(m)), data.keys()))
         # Headers
         headers = (
@@ -766,7 +766,7 @@ class Trivia(commands.Cog):
         try:
             with file.open("wb") as fp:
                 fp.write(buffer.read())
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             await ctx.send(
                 _(
                     "There was an error saving the file.\n"

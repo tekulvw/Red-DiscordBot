@@ -3,49 +3,60 @@
 This module contains extended classes and functions which are intended to
 be used instead of those from the `discord.ext.commands` module.
 """
+
 from __future__ import annotations
 
 import inspect
 import io
 import re
-import functools
-import weakref
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Awaitable,
     Callable,
-    ClassVar,
     Dict,
     List,
     Literal,
+    MutableMapping,
     Optional,
     Tuple,
     TypeVar,
     Union,
-    MutableMapping,
-    TYPE_CHECKING,
 )
 
 import discord
 from discord.ext.commands import (
-    BadArgument,
-    CommandError,
     CheckFailure,
+    CommandError,
     DisabledCommand,
-    command as dpy_command_deco,
-    Command as DPYCommand,
-    GroupCog as DPYGroupCog,
-    HybridCommand as DPYHybridCommand,
-    HybridGroup as DPYHybridGroup,
+)
+from discord.ext.commands import (
     Cog as DPYCog,
+)
+from discord.ext.commands import (
     CogMeta as DPYCogMeta,
+)
+from discord.ext.commands import (
+    Command as DPYCommand,
+)
+from discord.ext.commands import (
     Group as DPYGroup,
-    Greedy,
+)
+from discord.ext.commands import (
+    GroupCog as DPYGroupCog,
+)
+from discord.ext.commands import (
+    HybridCommand as DPYHybridCommand,
+)
+from discord.ext.commands import (
+    HybridGroup as DPYHybridGroup,
+)
+from discord.ext.commands import (
+    command as dpy_command_deco,
 )
 
-from .requires import PermState, PrivilegeLevel, Requires, PermStateAllowedStates
 from .. import app_commands
 from ..i18n import Translator
+from .requires import PermState, PermStateAllowedStates, PrivilegeLevel, Requires
 
 _T = TypeVar("_T")
 _CogT = TypeVar("_CogT", bound="Cog")
@@ -53,9 +64,10 @@ _CogT = TypeVar("_CogT", bound="Cog")
 
 if TYPE_CHECKING:
     # circular import avoidance
-    from .context import Context
-    from typing_extensions import ParamSpec, Concatenate
     from discord.ext.commands._types import ContextT, Coro
+    from typing_extensions import Concatenate, ParamSpec
+
+    from .context import Context
 
     _P = ParamSpec("_P")
 
@@ -360,7 +372,7 @@ class Command(CogCommandMixin, DPYCommand):
                 args = tuple(a for a in args if a is not _NoneType)
                 # typing.Union is automatically deduplicated and flattened
                 # so we don't need to anything else here
-                self.params[key] = value = value.replace(annotation=Union[args])
+                self.params[key] = value.replace(annotation=Union[args])
 
     @property
     def help(self):

@@ -2,25 +2,27 @@ import asyncio
 import io
 import textwrap
 from copy import copy
-from typing import Union, Optional, Dict, List, Tuple, Any, Iterator, ItemsView, Literal, cast
+from typing import Any, Dict, ItemsView, Iterator, List, Literal, Optional, Tuple, Union, cast
 
 import discord
 import yaml
-from schema import And, Or, Schema, SchemaError, Optional as UseOptional
+
 from redbot.core import commands, config
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils import can_user_react_in
 from redbot.core.utils.chat_formatting import box, error, success
 from redbot.core.utils.menus import start_adding_reactions
-from redbot.core.utils.predicates import ReactionPredicate, MessagePredicate
+from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
+from schema import And, Or, Schema, SchemaError
+from schema import Optional as UseOptional
 
 from .converters import (
-    CogOrCommand,
-    RuleType,
     ClearableRuleType,
-    GuildUniqueObjectFinder,
+    CogOrCommand,
     GlobalUniqueObjectFinder,
+    GuildUniqueObjectFinder,
+    RuleType,
 )
 
 _ = Translator("Permissions", __file__)
@@ -35,7 +37,12 @@ _NewConfigSchema = Dict[str, Dict[int, Dict[str, Dict[int, bool]]]]
 # The strings in the schema are constants and should get extracted, but not translated until
 # runtime.
 translate = _
-_ = lambda s: s
+
+
+def _(s):
+    return s
+
+
 YAML_SCHEMA = Schema(
     Or(
         {

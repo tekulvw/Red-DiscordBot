@@ -3,26 +3,27 @@ import contextlib
 import json
 import logging
 import time
-from dateutil.parser import parse as parse_time
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 from random import choice
 from string import ascii_letters
-from datetime import datetime, timedelta, timezone
-import xml.etree.ElementTree as ET
-from typing import ClassVar, Optional, List, Tuple
+from typing import ClassVar, List, Optional, Tuple
 
 import aiohttp
 import discord
+from dateutil.parser import parse as parse_time
+
+from redbot.core.i18n import Translator
+from redbot.core.utils.chat_formatting import humanize_number
 
 from .errors import (
     APIError,
-    OfflineStream,
     InvalidTwitchCredentials,
     InvalidYoutubeCredentials,
+    OfflineStream,
     StreamNotFound,
     YoutubeQuotaExceeded,
 )
-from redbot.core.i18n import Translator
-from redbot.core.utils.chat_formatting import humanize_number, humanize_timedelta
 
 TWITCH_BASE_URL = "https://api.twitch.tv"
 TWITCH_ID_ENDPOINT = TWITCH_BASE_URL + "/helix/users"
@@ -47,7 +48,6 @@ def rnd(url):
 
 def get_video_ids_from_feed(feed):
     root = ET.fromstring(feed)
-    rss_video_ids = []
     for child in root.iter("{http://www.w3.org/2005/Atom}entry"):
         for i in child.iter("{http://www.youtube.com/xml/schemas/2015}videoId"):
             yield i.text

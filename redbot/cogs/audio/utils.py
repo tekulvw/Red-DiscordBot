@@ -1,14 +1,11 @@
-import asyncio
-import contextlib
 import math
 import platform
 import re
 import sys
 import time
-
 from enum import Enum, unique
 from pathlib import Path
-from typing import Any, MutableMapping, Tuple, Union
+from typing import MutableMapping, Tuple, Union
 
 import discord
 import psutil
@@ -18,7 +15,7 @@ from redbot.core import commands
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator
 
-from .managed_node.ll_server_config import DEFAULT_LAVALINK_YAML, change_dict_naming_convention
+from .managed_node.ll_server_config import DEFAULT_LAVALINK_YAML
 
 log = getLogger("red.cogs.Audio.task.callback")
 _ = Translator("Audio", Path(__file__))

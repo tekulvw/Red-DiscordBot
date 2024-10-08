@@ -2,14 +2,27 @@ import os as _os
 import re as _re
 import sys as _sys
 import warnings as _warnings
+from functools import lru_cache
 from math import inf as _inf
 from typing import (
     ClassVar as _ClassVar,
+)
+from typing import (
     Dict as _Dict,
+)
+from typing import (
     List as _List,
+)
+from typing import (
     Optional as _Optional,
+)
+from typing import (
     Pattern as _Pattern,
+)
+from typing import (
     Tuple as _Tuple,
+)
+from typing import (
     Union as _Union,
 )
 
@@ -330,12 +343,17 @@ def _update_logger_class():
     maybe_update_logger_class()
 
 
+@lru_cache
 def _early_init():
     # This function replaces logger so we preferably (though not necessarily) want that to happen
     # before importing anything that calls `logging.getLogger()`, i.e. `asyncio`.
     _update_logger_class()
     _update_event_loop_policy()
     _ensure_no_colorama()
+
+
+# guarantees this gets called before any (absolute) redbot import
+# _early_init()
 
 
 # This is bumped automatically by release workflow (`.github/workflows/scripts/bump_version.py`)

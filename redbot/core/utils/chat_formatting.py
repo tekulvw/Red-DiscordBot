@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import itertools
 import math
 import textwrap
 from io import BytesIO
@@ -464,7 +463,7 @@ def quote(text: str) -> str:
         The marked up text.
 
     """
-    return textwrap.indent(text, "> ", lambda l: True)
+    return textwrap.indent(text, "> ", lambda l: True)  # noqa: E741
 
 
 def escape(text: str, *, mass_mentions: bool = False, formatting: bool = False) -> str:

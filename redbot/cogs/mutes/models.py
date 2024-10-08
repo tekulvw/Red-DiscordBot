@@ -1,8 +1,7 @@
-from typing import Optional, Dict
+from dataclasses import dataclass
+from typing import Dict, Optional
 
 import discord
-
-from dataclasses import dataclass
 
 
 @dataclass

@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 from datetime import timedelta
-from typing import List, Iterable, Union, TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union
 
 import discord
 
@@ -84,7 +86,7 @@ async def slow_deletion(messages: Iterable[discord.Message]):
             pass
 
 
-def get_audit_reason(author: discord.Member, reason: str = None, *, shorten: bool = False):
+def get_audit_reason(author: discord.Member, reason: str | None = None, *, shorten: bool = False):
     """Construct a reason to appear in the audit log.
 
     Parameters
@@ -108,8 +110,9 @@ def get_audit_reason(author: discord.Member, reason: str = None, *, shorten: boo
         if reason
         else "Action requested by {} (ID {}).".format(author, author.id)
     )
-    if shorten and len(audit_reason) > 512:
-        audit_reason = f"{audit_reason[:509]}..."
+    max_audit_len = 512
+    if shorten and len(audit_reason) > max_audit_len:
+        audit_reason = f"{audit_reason[:max_audit_len - 3]}..."
     return audit_reason
 
 

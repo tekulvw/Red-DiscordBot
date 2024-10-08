@@ -1,16 +1,8 @@
-from redbot import _early_init
-
-# this needs to be called as early as possible
-_early_init()
-
 import asyncio
 import functools
-import getpass
 import json
 import logging
 import os
-import pip
-import platform
 import shutil
 import signal
 import sys
@@ -24,13 +16,12 @@ import rich
 
 import redbot.logging
 from redbot import __version__
-from redbot.core.bot import Red, ExitCodes, _NoOwnerSet
-from redbot.core._cli import interactive_config, confirm, parse_cli_flags
-from redbot.setup import get_data_dir, get_name, save_config
-from redbot.core import data_manager, _drivers
+from redbot.core import _drivers, data_manager
+from redbot.core._cli import confirm, interactive_config, parse_cli_flags
 from redbot.core._debuginfo import DebugInfo
 from redbot.core._sharedlibdeprecation import SharedLibImportWarner
-
+from redbot.core.bot import ExitCodes, Red, _NoOwnerSet
+from redbot.setup import get_data_dir, get_name, save_config
 
 log = logging.getLogger("red.main")
 
@@ -404,8 +395,6 @@ async def run_bot(red: Red, cli_flags: Namespace) -> None:
             " (and --co-owner if you need more than one) flag\n"
         )
         sys.exit(ExitCodes.CONFIGURATION_ERROR)
-
-    return None
 
 
 def handle_early_exit_flags(cli_flags: Namespace):

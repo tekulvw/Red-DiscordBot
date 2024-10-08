@@ -1,13 +1,17 @@
 """Module to manage trivia sessions."""
+
 import asyncio
-import time
 import random
+import time
 from collections import Counter
+
 import discord
+
 from redbot.core import bank, errors
 from redbot.core.i18n import Translator
-from redbot.core.utils.chat_formatting import box, bold, humanize_list, humanize_number
+from redbot.core.utils.chat_formatting import bold, box, humanize_list
 from redbot.core.utils.common_filters import normalize_smartquotes
+
 from .converters import MAX_VALUE
 from .log import LOG
 
@@ -16,7 +20,10 @@ __all__ = ["TriviaSession"]
 T_ = Translator("TriviaSession", __file__)
 
 
-_ = lambda s: s
+def _(s):
+    return s
+
+
 _REVEAL_MESSAGES = (
     _("I know this one! {answer}!"),
     _("Easy: {answer}."),

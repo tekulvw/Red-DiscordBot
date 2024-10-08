@@ -8,23 +8,28 @@ description = "A highly customisable Discord bot"
 readme = "README.md"
 authors = [{ name = "Cog Creators" }]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Framework :: AsyncIO",
-    "Intended Audience :: Developers",
-    "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Natural Language :: English",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: Microsoft :: Windows",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Topic :: Communications :: Chat",
+  "Development Status :: 5 - Production/Stable",
+  "Framework :: AsyncIO",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Natural Language :: English",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Communications :: Chat",
 ]
-dynamic = ["version", "requires-python", "dependencies", "optional-dependencies"]
+dynamic = [
+  "version",
+  "requires-python",
+  "dependencies",
+  "optional-dependencies",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Cog-Creators/Red-DiscordBot"
@@ -42,16 +47,34 @@ redbot-setup = "redbot.setup:run_cli"
 [project.entry-points.pytest11]
 red-discordbot = "redbot.pytest"
 
-[tool.black]
+[tool.ruff]
+include = ["redbot/**/*.py"]
+extend-exclude = ["redbot/vendored"]
+
+
 line-length = 99
-required-version = '23'
-target-version = ['py38']
-include = '\.py$'
-force-exclude = '''
-/(
-    redbot\/vendored
-)/
-'''
+target-version = "py38"
+
+[tool.ruff.lint]
+extend-select = ["E", "F", "I", "PL", "RUF100"]
+ignore = [
+  "E501",    # line too long
+  "PLR0911", # too many return's
+  "PLR0912", # too many branches
+  "PLR0913",
+  "PLR0915", # too many statements
+  "PLR2004", # magic number
+  "PLW0603", # globals are used everywhere
+  "PLW2901", # really like overwriting loop variables
+]
+
+[tool.pyright]
+pythonVersion = "3.8"
+
+# soon :tm:
+# mostly to get my IDE to shut up for the time being
+exclude = ["redbot"]
+ignore = ["redbot"]
 
 [tool.pytest.ini_options]
 asyncio_mode = 'auto'

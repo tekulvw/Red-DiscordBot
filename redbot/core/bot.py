@@ -1,63 +1,62 @@
 from __future__ import annotations
+
 import asyncio
+import contextlib
 import inspect
 import logging
 import os
 import platform
 import shutil
 import sys
-import contextlib
 import weakref
-import functools
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict, namedtuple
 from datetime import datetime
 from importlib.machinery import ModuleSpec
 from pathlib import Path
+from types import MappingProxyType
 from typing import (
-    Optional,
-    Union,
-    List,
-    Iterable,
-    Dict,
-    NoReturn,
-    Set,
-    TypeVar,
-    Callable,
-    Awaitable,
+    TYPE_CHECKING,
     Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Iterable,
+    List,
     Literal,
     MutableMapping,
+    NoReturn,
+    Optional,
     Set,
+    TypeVar,
+    Union,
     overload,
-    TYPE_CHECKING,
 )
-from types import MappingProxyType
 
 import discord
 from discord.ext import commands as dpy_commands
 from discord.ext.commands import when_mentioned_or
 
-from . import Config, i18n, app_commands, commands, errors, _drivers, modlog, bank
+from . import Config, _drivers, app_commands, bank, commands, errors, i18n, modlog
 from ._cli import ExitCodes
 from ._cog_manager import CogManager, CogManagerUI
+from ._events import init_events
+from ._global_checks import init_global_checks
+from ._rpc import RPCMixin
+from ._settings_caches import (
+    DisabledCogCache,
+    I18nManager,
+    IgnoreManager,
+    PrefixManager,
+    WhitelistBlacklistManager,
+)
 from .core_commands import Core
 from .data_manager import cog_data_path
 from .dev_commands import Dev
-from ._events import init_events
-from ._global_checks import init_global_checks
-from ._settings_caches import (
-    PrefixManager,
-    IgnoreManager,
-    WhitelistBlacklistManager,
-    DisabledCogCache,
-    I18nManager,
-)
-from .utils.predicates import MessagePredicate
-from ._rpc import RPCMixin
 from .tree import RedTree
-from .utils import can_user_send_messages_in, common_filters, AsyncIter
-from .utils.chat_formatting import box, text_to_file
+from .utils import AsyncIter, can_user_send_messages_in, common_filters
 from .utils._internal_utils import send_to_owners_with_prefix_replaced
+from .utils.chat_formatting import box, text_to_file
+from .utils.predicates import MessagePredicate
 
 if TYPE_CHECKING:
     from discord.ext.commands.hybrid import CommandCallback, ContextT, P
@@ -96,9 +95,7 @@ class _NoOwnerSet(RuntimeError):
 # d.py autoshardedbot should be at the end
 # all of our mixins should happen before,
 # and must include a call to super().__init__ unless they do not provide an init
-class Red(
-    commands.GroupMixin, RPCMixin, dpy_commands.bot.AutoShardedBot
-):  # pylint: disable=no-member # barely spurious warning caused by shadowing
+class Red(commands.GroupMixin, RPCMixin, dpy_commands.bot.AutoShardedBot):  # pylint: disable=no-member # barely spurious warning caused by shadowing
     """Our subclass of discord.ext.commands.AutoShardedBot"""
 
     def __init__(self, *args, cli_flags=None, bot_dir: Path = Path.cwd(), **kwargs):
@@ -1509,12 +1506,12 @@ class Red(
         return await self._config.guild(discord.Object(id=guild_id)).mod_role()
 
     @overload
-    async def get_shared_api_tokens(self, service_name: str = ...) -> Dict[str, str]:
-        ...
+    async def get_shared_api_tokens(self, service_name: str = ...) -> Dict[str, str]: ...
 
     @overload
-    async def get_shared_api_tokens(self, service_name: None = ...) -> Dict[str, Dict[str, str]]:
-        ...
+    async def get_shared_api_tokens(
+        self, service_name: None = ...
+    ) -> Dict[str, Dict[str, str]]: ...
 
     async def get_shared_api_tokens(
         self, service_name: Optional[str] = None
@@ -1689,7 +1686,7 @@ class Red(
         try:
             await lib.setup(self)
             await self.tree.red_check_enabled()
-        except Exception as e:
+        except Exception:
             await self._remove_module_references(lib.__name__)
             await self._call_module_finalizers(lib, name)
             raise
@@ -2303,7 +2300,7 @@ class Red(
             except commands.commands.RedUnhandledAPI:
                 log.warning(f"{stype}.{sname} did not handle data deletion ")
                 failures["unhandled"].append(sname)
-            except Exception as exc:
+            except Exception:
                 log.exception(f"{stype}.{sname} errored when handling data deletion ")
                 failures[stype].append(sname)
 

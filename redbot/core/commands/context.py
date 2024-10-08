@@ -1,19 +1,17 @@
 from __future__ import annotations
 
-import asyncio
-import contextlib
 import os
-import re
-from typing import Iterable, List, Union, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, List, Optional, Union
+
 import discord
 from discord.ext.commands import Context as DPYContext
 
-from .requires import PermState
 from ..utils import can_user_react_in
+from .requires import PermState
 
 if TYPE_CHECKING:
-    from .commands import Command
     from ..bot import Red
+    from .commands import Command
 
 TICK = "\N{WHITE HEAVY CHECK MARK}"
 
@@ -272,7 +270,7 @@ class Context(DPYContext):
             return self.bot.user
 
 
-if TYPE_CHECKING or os.getenv("BUILDING_DOCS", False):
+if TYPE_CHECKING or os.getenv("BUILDING_DOCS") is not None:
 
     class DMContext(Context):
         """
@@ -285,20 +283,16 @@ if TYPE_CHECKING or os.getenv("BUILDING_DOCS", False):
         """
 
         @property
-        def author(self) -> discord.User:
-            ...
+        def author(self) -> discord.User: ...
 
         @property
-        def channel(self) -> discord.DMChannel:
-            ...
+        def channel(self) -> discord.DMChannel: ...
 
         @property
-        def guild(self) -> None:
-            ...
+        def guild(self) -> None: ...
 
         @property
-        def me(self) -> discord.ClientUser:
-            ...
+        def me(self) -> discord.ClientUser: ...
 
     class GuildContext(Context):
         """
@@ -311,24 +305,20 @@ if TYPE_CHECKING or os.getenv("BUILDING_DOCS", False):
         """
 
         @property
-        def author(self) -> discord.Member:
-            ...
+        def author(self) -> discord.Member: ...
 
         @property
         def channel(
             self,
         ) -> Union[
             discord.TextChannel, discord.VoiceChannel, discord.StageChannel, discord.Thread
-        ]:
-            ...
+        ]: ...
 
         @property
-        def guild(self) -> discord.Guild:
-            ...
+        def guild(self) -> discord.Guild: ...
 
         @property
-        def me(self) -> discord.Member:
-            ...
+        def me(self) -> discord.Member: ...
 
 else:
     GuildContext = Context

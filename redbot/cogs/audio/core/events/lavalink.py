@@ -10,6 +10,7 @@ from discord.backoff import ExponentialBackoff
 from red_commons.logging import getLogger
 
 from redbot.core.i18n import Translator, set_contextual_locales_from_guild
+
 from ...errors import DatabaseError, TrackEnqueueError
 from ..abc import MixinMeta
 from ..cog_utils import CompositeMetaClass
@@ -587,45 +588,44 @@ class LavalinkEvents(MixinMeta, metaclass=CompositeMetaClass):
                     await self.config.guild_from_id(
                         guild_id=guild_id
                     ).currently_auto_playing_in.set([])
+            elif not player.paused and player.current:
+                player.store("resumes", player.fetch("resumes", 0) + 1)
+                await player.resume(player.current, start=player.position, replace=True)
+                ws_audio_log.info(
+                    "WS EVENT - SIMPLE RESUME (Healthy Socket) | "
+                    "Voice websocket closed event "
+                    "Code: %s -- Remote: %s -- %s",
+                    code,
+                    by_remote,
+                    reason,
+                )
+                ws_audio_log.debug(
+                    "WS EVENT - SIMPLE RESUME (Healthy Socket) | "
+                    "Voice websocket closed event "
+                    "Code: %s -- Remote: %s -- %s, %r",
+                    code,
+                    by_remote,
+                    reason,
+                    player,
+                )
             else:
-                if not player.paused and player.current:
-                    player.store("resumes", player.fetch("resumes", 0) + 1)
-                    await player.resume(player.current, start=player.position, replace=True)
-                    ws_audio_log.info(
-                        "WS EVENT - SIMPLE RESUME (Healthy Socket) | "
-                        "Voice websocket closed event "
-                        "Code: %s -- Remote: %s -- %s",
-                        code,
-                        by_remote,
-                        reason,
-                    )
-                    ws_audio_log.debug(
-                        "WS EVENT - SIMPLE RESUME (Healthy Socket) | "
-                        "Voice websocket closed event "
-                        "Code: %s -- Remote: %s -- %s, %r",
-                        code,
-                        by_remote,
-                        reason,
-                        player,
-                    )
-                else:
-                    ws_audio_log.info(
-                        "WS EVENT - IGNORED (Healthy Socket) | "
-                        "Voice websocket closed event "
-                        "Code: %s -- Remote: %s -- %s",
-                        code,
-                        by_remote,
-                        reason,
-                    )
-                    ws_audio_log.debug(
-                        "WS EVENT - IGNORED (Healthy Socket) | "
-                        "Voice websocket closed event "
-                        "Code: %s -- Remote: %s -- %s, %r",
-                        code,
-                        by_remote,
-                        reason,
-                        player,
-                    )
+                ws_audio_log.info(
+                    "WS EVENT - IGNORED (Healthy Socket) | "
+                    "Voice websocket closed event "
+                    "Code: %s -- Remote: %s -- %s",
+                    code,
+                    by_remote,
+                    reason,
+                )
+                ws_audio_log.debug(
+                    "WS EVENT - IGNORED (Healthy Socket) | "
+                    "Voice websocket closed event "
+                    "Code: %s -- Remote: %s -- %s, %r",
+                    code,
+                    by_remote,
+                    reason,
+                    player,
+                )
         except Exception as exc:
             log.exception("Error in task", exc_info=exc)
         finally:

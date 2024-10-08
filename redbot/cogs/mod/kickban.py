@@ -5,17 +5,19 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple, Union
 
 import discord
+
 from redbot.core import commands, i18n, modlog
 from redbot.core.commands import RawUserIdConverter
 from redbot.core.utils import AsyncIter
 from redbot.core.utils.chat_formatting import (
-    pagify,
-    humanize_number,
     bold,
-    humanize_list,
     format_perms_list,
+    humanize_list,
+    humanize_number,
+    pagify,
 )
 from redbot.core.utils.mod import get_audit_reason
+
 from .abc import MixinMeta
 from .utils import is_allowed_by_hierarchy
 
@@ -46,21 +48,20 @@ class KickBanMixin(MixinMeta):
                 # doesn't grant temporary membership
                 # (i.e. they won't be kicked on disconnect)
                 return inv.url
-        else:  # No existing invite found that is valid
-            channels_and_perms = (
-                (channel, channel.permissions_for(guild.me)) for channel in guild.text_channels
-            )
-            channel = next(
-                (channel for channel, perms in channels_and_perms if perms.create_instant_invite),
-                None,
-            )
-            if channel is None:
-                return ""
-            try:
-                # Create invite that expires after max_age
-                return (await channel.create_invite(max_age=max_age)).url
-            except discord.HTTPException:
-                return ""
+        channels_and_perms = (
+            (channel, channel.permissions_for(guild.me)) for channel in guild.text_channels
+        )
+        channel = next(
+            (channel for channel, perms in channels_and_perms if perms.create_instant_invite),
+            None,
+        )
+        if channel is None:
+            return ""
+        try:
+            # Create invite that expires after max_age
+            return (await channel.create_invite(max_age=max_age)).url
+        except discord.HTTPException:
+            return ""
 
     @staticmethod
     async def _voice_perm_check(

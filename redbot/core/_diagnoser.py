@@ -8,6 +8,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Awaitable, Callable, Iterable, List, Optional, Union
 
 import discord
+
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils import can_user_send_messages_in
@@ -170,29 +171,28 @@ class DetailedGlobalCallOnceChecksMixin(IssueDiagnoserBase):
                     command=self._format_command_name("ignore list"),
                     channel=self.channel.mention,
                 )
+        elif isinstance(self.channel, discord.Thread):
+            resolution = _(
+                "To fix this issue, check the list returned by the {command} command"
+                " and ensure that the {thread} thread, its parent channel,"
+                " the channel category it belongs to ({channel_category}),"
+                " and the server aren't a part of that list."
+            ).format(
+                command=self._format_command_name("ignore list"),
+                thread=self.channel.mention,
+                channel_category=self.channel.category.mention,
+            )
         else:
-            if isinstance(self.channel, discord.Thread):
-                resolution = _(
-                    "To fix this issue, check the list returned by the {command} command"
-                    " and ensure that the {thread} thread, its parent channel,"
-                    " the channel category it belongs to ({channel_category}),"
-                    " and the server aren't a part of that list."
-                ).format(
-                    command=self._format_command_name("ignore list"),
-                    thread=self.channel.mention,
-                    channel_category=self.channel.category.mention,
-                )
-            else:
-                resolution = _(
-                    "To fix this issue, check the list returned by the {command} command"
-                    " and ensure that the {channel} channel,"
-                    " the channel category it belongs to ({channel_category}),"
-                    " and the server aren't a part of that list."
-                ).format(
-                    command=self._format_command_name("ignore list"),
-                    channel=self.channel.mention,
-                    channel_category=self.channel.category.mention,
-                )
+            resolution = _(
+                "To fix this issue, check the list returned by the {command} command"
+                " and ensure that the {channel} channel,"
+                " the channel category it belongs to ({channel_category}),"
+                " and the server aren't a part of that list."
+            ).format(
+                command=self._format_command_name("ignore list"),
+                channel=self.channel.mention,
+                channel_category=self.channel.category.mention,
+            )
 
         return CheckResult(
             False,

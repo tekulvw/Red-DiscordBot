@@ -14,18 +14,18 @@ from __future__ import annotations
 
 import ast
 import asyncio
-import aiohttp
 import inspect
 import io
+import re
+import sys
 import textwrap
 import traceback
 import types
-import re
-import sys
 from copy import copy
-from typing import Any, Awaitable, Dict, Iterator, List, Literal, Tuple, Type, TypeVar, Union
 from types import CodeType, TracebackType
+from typing import Any, Awaitable, Dict, Iterator, List, Literal, Tuple, Type, TypeVar, Union
 
+import aiohttp
 import discord
 
 from . import commands
@@ -320,7 +320,6 @@ class DevOutput:
                 break
             tb = tb.tb_next
 
-        filename = self.filename
         # sometimes SyntaxError.text is None, sometimes it isn't
         if issubclass(exc_type, SyntaxError) and exc.lineno is not None:
             try:
@@ -389,7 +388,7 @@ class DevOutput:
                     end_lineno = frame_summary.end_lineno
                     if end_lineno is not None:
                         end_lineno -= line_offset
-                    frame_summary = traceback.FrameSummary(
+                    structured_summary = traceback.FrameSummary(
                         frame_summary.filename,
                         lineno,
                         frame_summary.name,
@@ -399,10 +398,13 @@ class DevOutput:
                         end_colno=frame_summary.end_colno,
                     )
                 else:
-                    frame_summary = traceback.FrameSummary(
-                        frame_summary.filename, lineno, frame_summary.name, line=line
+                    structured_summary = traceback.FrameSummary(
+                        frame_summary.filename,
+                        lineno,
+                        frame_summary.name,
+                        line=line,
                     )
-                stack_summary[idx] = frame_summary
+                stack_summary[idx] = structured_summary
 
         return "".join(top_traceback_exc.format())
 

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union, Set, Iterable, Tuple, overload
 import asyncio
 from argparse import Namespace
 from collections import defaultdict
+from typing import Dict, Iterable, List, Optional, Set, Union, overload
 
 import discord
 
@@ -91,12 +91,10 @@ class I18nManager:
                 return out
 
     @overload
-    async def set_locale(self, guild: None, locale: str):
-        ...
+    async def set_locale(self, guild: None, locale: str): ...
 
     @overload
-    async def set_locale(self, guild: discord.Guild, locale: Union[str, None]):
-        ...
+    async def set_locale(self, guild: discord.Guild, locale: Union[str, None]): ...
 
     async def set_locale(
         self, guild: Union[discord.Guild, None], locale: Union[str, None]
@@ -177,12 +175,11 @@ class IgnoreManager:
             self._cached_channels[cid] = chan_ret
         if cat_id and cat_id in self._cached_channels:
             cat_ret = self._cached_channels[cat_id]
+        elif cat_id:
+            cat_ret = await self._config.channel_from_id(cat_id).ignored()
+            self._cached_channels[cat_id] = cat_ret
         else:
-            if cat_id:
-                cat_ret = await self._config.channel_from_id(cat_id).ignored()
-                self._cached_channels[cat_id] = cat_ret
-            else:
-                cat_ret = False
+            cat_ret = False
         ret = chan_ret or cat_ret
 
         return ret

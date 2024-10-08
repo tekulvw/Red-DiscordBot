@@ -1,11 +1,10 @@
 import itertools
 import math
 import re
-from typing import Any, NoReturn
-
-from schema import And, Const, Optional, Schema, SchemaError, SchemaMissingKeyError, Use
+from typing import Any
 
 from redbot.core.i18n import Translator
+from schema import And, Const, Optional, Schema, SchemaError, SchemaMissingKeyError, Use
 
 __all__ = ("TRIVIA_LIST_SCHEMA", "format_schema_error")
 

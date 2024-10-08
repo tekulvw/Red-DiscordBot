@@ -2,21 +2,20 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import (
-    Set,
     TYPE_CHECKING,
     Any,
+    Dict,
     List,
     Mapping,
     MutableMapping,
     Optional,
+    Set,
     Tuple,
     Union,
-    Dict,
 )
 
 import aiohttp
@@ -396,7 +395,7 @@ class MixinMeta(ABC):
 
     @abstractmethod
     async def _apply_gains(self, guild_id: int, gains: List[float]) -> None:
-        NotImplementedError()
+        raise NotImplementedError()
 
     @abstractmethod
     async def _apply_gain(self, guild_id: int, band: int, gain: float) -> None:

@@ -2,23 +2,23 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import List, Literal, Union, Optional, cast, TYPE_CHECKING
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, List, Literal, Optional, Union, cast
 
 import discord
 
 from redbot.core import Config
+
+from .generic_casetypes import all_generics
+from .i18n import Translator, set_contextual_locales_from_guild
 from .utils import AsyncIter
+from .utils.chat_formatting import bold, pagify
 from .utils.common_filters import (
+    escape_spoilers,
     filter_invites,
     filter_mass_mentions,
     filter_urls,
-    escape_spoilers,
 )
-from .utils.chat_formatting import bold, pagify
-from .i18n import Translator, set_contextual_locales_from_guild
-
-from .generic_casetypes import all_generics
 
 if TYPE_CHECKING:
     from redbot.core.bot import Red
@@ -177,6 +177,7 @@ async def _migrate_config(from_version: int, to_version: int):
 
 
 class Case:
+    DELETED_USER_SENTINEL: int = 0xDE1
     """
     Case()
 
@@ -398,7 +399,7 @@ class Case:
             moderator = _("Unknown")
         elif isinstance(self.moderator, int):
             # can't use _() inside f-string expressions, see bpo-36310 and red#3818
-            if self.moderator == 0xDE1:
+            if self.moderator == self.DELETED_USER_SENTINEL:
                 moderator = _("Deleted User.")
             else:
                 translated = _("Unknown or Deleted User")
@@ -420,7 +421,7 @@ class Case:
             amended_by = None
         elif isinstance(self.amended_by, int):
             # can't use _() inside f-string expressions, see bpo-36310 and red#3818
-            if self.amended_by == 0xDE1:
+            if self.amended_by == self.DELETED_USER_SENTINEL:
                 amended_by = _("Deleted User.")
             else:
                 translated = _("Unknown or Deleted User")
@@ -435,7 +436,7 @@ class Case:
             )
 
         if isinstance(self.user, int):
-            if self.user == 0xDE1:
+            if self.user == self.DELETED_USER_SENTINEL:
                 user = _("Deleted User.")
             elif self.last_known_username is None:
                 # can't use _() inside f-string expressions, see bpo-36310 and red#3818
@@ -1194,8 +1195,7 @@ async def register_casetypes(new_types: List[dict]) -> List[CaseType]:
             pass
         else:
             type_list.append(ct)
-    else:
-        return type_list
+    return type_list
 
 
 async def get_modlog_channel(

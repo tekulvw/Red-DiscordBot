@@ -1,12 +1,11 @@
 import asyncio
+import logging
 import sys
 from typing import Optional
 
 from aiohttp import web
 from aiohttp_json_rpc import JsonRpc
 from aiohttp_json_rpc.rpc import JsonRpcMethod
-
-import logging
 
 from redbot.core._cli import ExitCodes
 
@@ -97,7 +96,7 @@ class RPC:
                     self._runner,
                     host="127.0.0.1",
                     port=port,
-                    shutdown_timeout=120
+                    shutdown_timeout=120,
                     # Give the RPC server 2 minutes to finish up, else slap it!
                     # Seems like a reasonable time. See Red#6391
                 ),

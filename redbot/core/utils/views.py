@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import discord
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+import discord
 from discord.ext.commands import BadArgument
-from typing import TYPE_CHECKING, Any, List, Optional, Union, Dict
+
+from redbot.core.commands.converter import get_dict_converter
 from redbot.core.i18n import Translator
 from redbot.vendored.discord.ext import menus
-from redbot.core.commands.converter import get_dict_converter
 
 if TYPE_CHECKING:
     from redbot.core.commands import Context
@@ -73,6 +74,7 @@ class _StopButton(discord.ui.Button):
 
 
 class SimpleMenu(discord.ui.View):
+    MAX_RENDERABLE_SELECT_OPTION_PAGES: int = 25
     """
     A simple Button menu
 
@@ -226,18 +228,26 @@ class SimpleMenu(discord.ui.View):
         # this will show the previous 12 and next 13 pages in the select menu
         # based on the currently displayed page. Once you reach close to the max
         # pages it will display the last 25 pages.
-        if len(self.select_options) > 25:
+        half_max = self.MAX_RENDERABLE_SELECT_OPTION_PAGES // 2
+        if len(self.select_options) > self.MAX_RENDERABLE_SELECT_OPTION_PAGES:
             minus_diff = None
-            plus_diff = 25
-            if 12 < self.current_page < len(self.select_options) - 25:
-                minus_diff = self.current_page - 12
-                plus_diff = self.current_page + 13
-            elif self.current_page >= len(self.select_options) - 25:
-                minus_diff = len(self.select_options) - 25
+            plus_diff = self.MAX_RENDERABLE_SELECT_OPTION_PAGES
+            if (
+                half_max
+                < self.current_page
+                < len(self.select_options) - self.MAX_RENDERABLE_SELECT_OPTION_PAGES
+            ):
+                minus_diff = self.current_page - half_max
+                plus_diff = self.current_page + half_max + 1
+            elif (
+                self.current_page
+                >= len(self.select_options) - self.MAX_RENDERABLE_SELECT_OPTION_PAGES
+            ):
+                minus_diff = len(self.select_options) - self.MAX_RENDERABLE_SELECT_OPTION_PAGES
                 plus_diff = None
             options = self.select_options[minus_diff:plus_diff]
         else:
-            options = self.select_options[:25]
+            options = self.select_options[: self.MAX_RENDERABLE_SELECT_OPTION_PAGES]
         return _SelectMenu(options)
 
     async def start(
@@ -296,7 +306,11 @@ class SimpleMenu(discord.ui.View):
             self.current_page = 0
             page = await self.source.get_page(self.current_page)
         value = await self.source.format_page(self, page)
-        if self.use_select_menu and len(self.select_options) > 25 and self.source.is_paginating():
+        if (
+            self.use_select_menu
+            and len(self.select_options) > self.MAX_RENDERABLE_SELECT_OPTION_PAGES
+            and self.source.is_paginating()
+        ):
             self.remove_item(self.select_menu)
             self.select_menu = self._get_select_menu()
             self.add_item(self.select_menu)

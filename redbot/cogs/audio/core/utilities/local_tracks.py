@@ -1,13 +1,11 @@
 import contextlib
-
 from pathlib import Path
 from typing import List, Union
 
-import discord
 import lavalink
+import rapidfuzz
 from red_commons.logging import getLogger
 
-import rapidfuzz
 from redbot.core import commands
 from redbot.core.i18n import Translator
 from redbot.core.utils import AsyncIter

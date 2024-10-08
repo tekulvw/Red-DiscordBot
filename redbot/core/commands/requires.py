@@ -6,6 +6,7 @@ requirements. This includes rules which override those requirements,
 as well as custom checks which can be overridden, and some special
 checks like bot permissions checks.
 """
+
 import asyncio
 import enum
 import inspect
@@ -26,11 +27,11 @@ from typing import (
 )
 
 import discord
-
 from discord.ext.commands import check
-from .errors import BotMissingPermissions
 
 from redbot.core import utils
+
+from .errors import BotMissingPermissions
 
 if TYPE_CHECKING:
     from .commands import Command

@@ -3,6 +3,7 @@ import logging
 from typing import Tuple, Union
 
 import discord
+
 from redbot.core import Config, commands
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils.chat_formatting import box
@@ -16,7 +17,11 @@ log = logging.getLogger("red.admin")
 
 T_ = Translator("Admin", __file__)
 
-_ = lambda s: s
+
+def _(s):
+    return s
+
+
 GENERIC_FORBIDDEN = _(
     "I attempted to do something that Discord denied me permissions for."
     " Your command failed to successfully complete."

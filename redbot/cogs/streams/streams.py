@@ -1,17 +1,21 @@
-import discord
-from redbot.core.utils.chat_formatting import humanize_list
-from redbot.core.bot import Red
-from redbot.core import commands, Config
-from redbot.core.i18n import cog_i18n, Translator, set_contextual_locales_from_guild
-from redbot.core.utils._internal_utils import send_to_owners_with_prefix_replaced
-from redbot.core.utils.chat_formatting import escape, inline, pagify
+import asyncio
+import contextlib
+import logging
+import re
+from collections import defaultdict
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Union
 
-from .streamtypes import (
-    PicartoStream,
-    Stream,
-    TwitchStream,
-    YoutubeStream,
-)
+import aiohttp
+import discord
+
+from redbot.core import Config, commands
+from redbot.core.bot import Red
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+from redbot.core.utils._internal_utils import send_to_owners_with_prefix_replaced
+from redbot.core.utils.chat_formatting import escape, humanize_list, inline, pagify
+
+from . import streamtypes as _streamtypes
 from .errors import (
     APIError,
     InvalidTwitchCredentials,
@@ -21,16 +25,12 @@ from .errors import (
     StreamsError,
     YoutubeQuotaExceeded,
 )
-from . import streamtypes as _streamtypes
-
-import re
-import logging
-import asyncio
-import aiohttp
-import contextlib
-from datetime import datetime
-from collections import defaultdict
-from typing import Optional, List, Tuple, Union, Dict
+from .streamtypes import (
+    PicartoStream,
+    Stream,
+    TwitchStream,
+    YoutubeStream,
+)
 
 MAX_RETRY_COUNT = 10
 
@@ -445,13 +445,10 @@ class Streams(commands.Cog):
                     token=token.get("client_id"),
                     bearer=self.ttv_bearer_cache.get("access_token", None),
                 )
+            elif is_yt:
+                stream = _class(_bot=self.bot, name=channel_name, token=token, config=self.config)
             else:
-                if is_yt:
-                    stream = _class(
-                        _bot=self.bot, name=channel_name, token=token, config=self.config
-                    )
-                else:
-                    stream = _class(_bot=self.bot, name=channel_name, token=token)
+                stream = _class(_bot=self.bot, name=channel_name, token=token)
             try:
                 exists = await self.check_exists(stream)
             except InvalidTwitchCredentials:
@@ -919,25 +916,24 @@ class Streams(commands.Cog):
                                         formatting=True,
                                     ),
                                 )
+                        elif guild_data["live_message_nomention"]:
+                            # Stop bad things from happening here...
+                            content = guild_data["live_message_nomention"]
+                            content = content.replace(
+                                "{stream.name}", str(stream.name)
+                            )  # Backwards compatibility
+                            content = content.replace(
+                                "{stream.display_name}", str(stream.display_name)
+                            )
+                            content = content.replace("{stream}", str(stream.name))
                         else:
-                            if guild_data["live_message_nomention"]:
-                                # Stop bad things from happening here...
-                                content = guild_data["live_message_nomention"]
-                                content = content.replace(
-                                    "{stream.name}", str(stream.name)
-                                )  # Backwards compatibility
-                                content = content.replace(
-                                    "{stream.display_name}", str(stream.display_name)
+                            content = _("{display_name} is live!").format(
+                                display_name=escape(
+                                    str(stream.display_name),
+                                    mass_mentions=True,
+                                    formatting=True,
                                 )
-                                content = content.replace("{stream}", str(stream.name))
-                            else:
-                                content = _("{display_name} is live!").format(
-                                    display_name=escape(
-                                        str(stream.display_name),
-                                        mass_mentions=True,
-                                        formatting=True,
-                                    )
-                                )
+                            )
                         await self._send_stream_alert(stream, channel, embed, content)
                         if edited_roles:
                             for role in edited_roles:

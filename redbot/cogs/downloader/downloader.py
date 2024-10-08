@@ -4,26 +4,28 @@ import os
 import re
 import shutil
 import sys
-from pathlib import Path
-from typing import Tuple, Union, Iterable, Collection, Optional, Dict, Set, List, cast
 from collections import defaultdict
+from pathlib import Path
+from typing import Collection, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 
 import discord
-from redbot.core import commands, Config, version_info as red_version_info
+
+from redbot.core import Config, commands
+from redbot.core import version_info as red_version_info
 from redbot.core.bot import Red
 from redbot.core.data_manager import cog_data_path
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils import can_user_react_in
-from redbot.core.utils.chat_formatting import box, pagify, humanize_list, inline
+from redbot.core.utils.chat_formatting import box, humanize_list, inline, pagify
 from redbot.core.utils.menus import start_adding_reactions
 from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
 
 from . import errors
 from .checks import do_install_agreement
 from .converters import InstalledCog
-from .installable import InstallableType, Installable, InstalledModule
+from .installable import Installable, InstallableType, InstalledModule
 from .log import log
-from .repo_manager import RepoManager, Repo
+from .repo_manager import Repo, RepoManager
 
 _ = Translator("Downloader", __file__)
 
@@ -709,11 +711,10 @@ class Downloader(commands.Cog):
                 message += _("\nUpdated: ") + humanize_list(tuple(map(inline, updated)))
             elif not repos:
                 message = _("All installed repos are already up to date.")
+            elif len(updated_repos) > 1:
+                message = _("These repos are already up to date.")
             else:
-                if len(updated_repos) > 1:
-                    message = _("These repos are already up to date.")
-                else:
-                    message = _("This repo is already up to date.")
+                message = _("This repo is already up to date.")
 
             if failed:
                 message += "\n" + self.format_failed_repos(failed)
@@ -1293,23 +1294,19 @@ class Downloader(commands.Cog):
                     updated_cognames, message = await self._update_cogs_and_libs(
                         ctx, cogs_to_update, libs_to_update, current_cog_versions=cogs_to_check
                     )
-                else:
-                    if repos:
-                        message += _("Cogs from provided repos are already up to date.")
-                    elif repo:
-                        if cogs:
-                            message += _(
-                                "Provided cogs are already up to date with this revision."
-                            )
-                        else:
-                            message += _(
-                                "Cogs from provided repo are already up to date with this revision."
-                            )
+                elif repos:
+                    message += _("Cogs from provided repos are already up to date.")
+                elif repo:
+                    if cogs:
+                        message += _("Provided cogs are already up to date with this revision.")
                     else:
-                        if cogs:
-                            message += _("Provided cogs are already up to date.")
-                        else:
-                            message += _("All installed cogs are already up to date.")
+                        message += _(
+                            "Cogs from provided repo are already up to date with this revision."
+                        )
+                elif cogs:
+                    message += _("Provided cogs are already up to date.")
+                else:
+                    message += _("All installed cogs are already up to date.")
                 if repo is not None:
                     await repo.checkout(repo.branch)
                 if pinned_cogs:
@@ -1348,7 +1345,10 @@ class Downloader(commands.Cog):
 
         - `<repo>` The repo to list cogs from.
         """
-        sort_function = lambda x: x.name.lower()
+
+        def sort_function(x):
+            return x.name.lower()
+
         all_installed_cogs = await self.installed_cogs()
         installed_cogs_in_repo = [cog for cog in all_installed_cogs if cog.repo_name == repo.name]
         installed_str = "\n".join(
@@ -1723,10 +1723,9 @@ class Downloader(commands.Cog):
                 else:
                     await ctx.send(_("OK then."))
                 return
-            else:
-                if can_react:
-                    with contextlib.suppress(discord.Forbidden):
-                        await query.clear_reactions()
+            elif can_react:
+                with contextlib.suppress(discord.Forbidden):
+                    await query.clear_reactions()
 
         await ctx.invoke(ctx.bot.get_cog("Core").reload, *updated_cognames)
 

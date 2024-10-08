@@ -158,7 +158,7 @@ class DebugInfo:
                 if sep:
                     cli_args[idx] = f"{arg_name}{sep}[EXPUNGED]"
                 elif len(cli_args) > idx + 1:
-                    cli_args[idx + 1] = f"[EXPUNGED]"
+                    cli_args[idx + 1] = "[EXPUNGED]"
             parts.append(f"Command line arguments: {cli_args!r}")
 
             # This formatting is a bit ugly but this is a debug information command
@@ -174,7 +174,7 @@ class DebugInfo:
                     owners.append(f"{u.id} ({u})")
                 except discord.HTTPException:
                     owners.append(f"{uid} (Unresolvable)")
-            owners_string = ", ".join(owners) or "None"
+            ", ".join(owners) or "None"
             parts.append(f"Owner(s): {', '.join(owners) or 'None'}")
 
         if self.is_connected:

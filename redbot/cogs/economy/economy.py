@@ -2,16 +2,16 @@ import calendar
 import logging
 import random
 from collections import defaultdict, deque, namedtuple
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from math import ceil
-from typing import cast, Iterable, Literal
+from typing import Iterable, Literal, cast
 
 import discord
 
 from redbot.core import Config, bank, commands, errors
-from redbot.core.commands.converter import TimedeltaConverter, positive_int
 from redbot.core.bot import Red
+from redbot.core.commands.converter import TimedeltaConverter, positive_int
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils import AsyncIter
 from redbot.core.utils.chat_formatting import box, humanize_number
@@ -39,7 +39,10 @@ class SMReel(Enum):
     snowflake = "\N{SNOWFLAKE}" + VARIATION_SELECTOR
 
 
-_ = lambda s: s
+def _(s):
+    return s
+
+
 PAYOUTS = {
     (SMReel.two, SMReel.two, SMReel.six): {
         "payout": lambda x: x * 50,
@@ -595,7 +598,8 @@ class Economy(commands.Cog):
             if i == 1:
                 sign = ">"
             slot += "{}{} {} {}\n".format(
-                sign, *[c.value for c in row]  # pylint: disable=no-member
+                sign,
+                *[c.value for c in row],  # pylint: disable=no-member
             )
 
         payout = PAYOUTS.get(rows[1])
@@ -875,24 +879,21 @@ class Economy(commands.Cog):
         credits_name = await bank.get_currency_name(guild)
         if await bank.is_global():
             await ctx.send(_("The bank must be per-server for per-role paydays to work."))
+        elif creds <= 0:  # Because I may as well...
+            default_creds = await self.config.guild(guild).PAYDAY_CREDITS()
+            await self.config.role(role).clear()
+            await ctx.send(
+                _(
+                    "The payday value attached to role has been removed. "
+                    "Users with this role will now receive the default pay "
+                    "of {num} {currency}."
+                ).format(num=humanize_number(default_creds), currency=credits_name)
+            )
         else:
-            if creds <= 0:  # Because I may as well...
-                default_creds = await self.config.guild(guild).PAYDAY_CREDITS()
-                await self.config.role(role).clear()
-                await ctx.send(
-                    _(
-                        "The payday value attached to role has been removed. "
-                        "Users with this role will now receive the default pay "
-                        "of {num} {currency}."
-                    ).format(num=humanize_number(default_creds), currency=credits_name)
-                )
-            else:
-                await self.config.role(role).PAYDAY_CREDITS.set(creds)
-                await ctx.send(
-                    _(
-                        "Every payday will now give {num} {currency} "
-                        "to people with the role {role_name}."
-                    ).format(
-                        num=humanize_number(creds), currency=credits_name, role_name=role.name
-                    )
-                )
+            await self.config.role(role).PAYDAY_CREDITS.set(creds)
+            await ctx.send(
+                _(
+                    "Every payday will now give {num} {currency} "
+                    "to people with the role {role_name}."
+                ).format(num=humanize_number(creds), currency=credits_name, role_name=role.name)
+            )

@@ -11,8 +11,8 @@ from discord.app_commands.checks import (
     cooldown,
     dynamic_cooldown,
     has_any_role,
-    has_role,
     has_permissions,
+    has_role,
 )
 
 __all__ = (

@@ -2,61 +2,57 @@ import asyncio
 import contextlib
 import datetime
 import importlib
+import io
 import itertools
 import keyword
 import logging
-import io
 import random
-import markdown
-import os
 import re
 import sys
-import platform
-import psutil
-import getpass
-import pip
 import traceback
-from pathlib import Path
 from collections import defaultdict
-from redbot.core import app_commands, data_manager
-from redbot.core.utils.menus import menu
-from redbot.core.utils.views import SetApiView
-from redbot.core.commands import GuildConverter, RawUserIdConverter
+from pathlib import Path
 from string import ascii_letters, digits
 from typing import (
     TYPE_CHECKING,
-    Union,
-    Tuple,
-    List,
-    Optional,
-    Iterable,
-    Sequence,
     Dict,
-    Set,
+    Iterable,
+    List,
     Literal,
+    Optional,
+    Sequence,
+    Union,
 )
 
 import aiohttp
 import discord
-from babel import Locale as BabelLocale, UnknownLocaleError
-from redbot.core.data_manager import storage_type
+import markdown
+from babel import Locale as BabelLocale
+from babel import UnknownLocaleError
+
+from redbot.core import app_commands
+from redbot.core.commands import GuildConverter, RawUserIdConverter
+from redbot.core.utils.menus import menu
+from redbot.core.utils.views import SetApiView
 
 from . import (
     __version__,
-    version_info as red_version_info,
+    bank,
     commands,
     errors,
     i18n,
-    bank,
     modlog,
 )
+from . import (
+    version_info as red_version_info,
+)
 from ._diagnoser import IssueDiagnoser
+from .commands import CogConverter, CommandConverter
+from .commands.requires import PrivilegeLevel
 from .utils import AsyncIter, can_user_send_messages_in
 from .utils._internal_utils import fetch_latest_red_version_info
-from .utils.predicates import MessagePredicate
 from .utils.chat_formatting import (
     box,
-    escape,
     humanize_list,
     humanize_number,
     humanize_timedelta,
@@ -64,9 +60,7 @@ from .utils.chat_formatting import (
     pagify,
     warning,
 )
-from .commands import CommandConverter, CogConverter
-from .commands.requires import PrivilegeLevel
-from .commands.help import HelpMenuSetting
+from .utils.predicates import MessagePredicate
 
 _entities = {
     "*": "&midast;",
@@ -388,6 +382,7 @@ class CoreLogic:
 
 @i18n.cog_i18n(_)
 class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
+    MAX_USERNAME_LEN: int = 32
     """
     The Core cog has many commands related to core functions.
 
@@ -1621,19 +1616,18 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
                 _("You haven't passed any server ID. Do you want me to leave this server?")
                 + " (yes/no)"
             )
+        elif number > 1:
+            msg = (
+                _("Are you sure you want me to leave these servers?")
+                + " (yes/no):\n"
+                + "\n".join(f"- {guild.name} (`{guild.id}`)" for guild in guilds)
+            )
         else:
-            if number > 1:
-                msg = (
-                    _("Are you sure you want me to leave these servers?")
-                    + " (yes/no):\n"
-                    + "\n".join(f"- {guild.name} (`{guild.id}`)" for guild in guilds)
-                )
-            else:
-                msg = (
-                    _("Are you sure you want me to leave this server?")
-                    + " (yes/no):\n"
-                    + f"- {guilds[0].name} (`{guilds[0].id}`)"
-                )
+            msg = (
+                _("Are you sure you want me to leave this server?")
+                + " (yes/no):\n"
+                + f"- {guilds[0].name} (`{guilds[0].id}`)"
+            )
 
         for guild in guilds:
             if guild.owner.id == ctx.me.id:
@@ -1655,24 +1649,19 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
             if pred.result is True:
                 if leaving_local_guild is True:
                     await ctx.send(_("Alright. Bye :wave:"))
+                elif number > 1:
+                    await ctx.send(_("Alright. Leaving {number} servers...").format(number=number))
                 else:
-                    if number > 1:
-                        await ctx.send(
-                            _("Alright. Leaving {number} servers...").format(number=number)
-                        )
-                    else:
-                        await ctx.send(_("Alright. Leaving one server..."))
+                    await ctx.send(_("Alright. Leaving one server..."))
                 for guild in guilds:
                     log.debug("Leaving guild '%s' (%s)", guild.name, guild.id)
                     await guild.leave()
+            elif leaving_local_guild is True:
+                await ctx.send(_("Alright, I'll stay then. :)"))
+            elif number > 1:
+                await ctx.send(_("Alright, I'm not leaving those servers."))
             else:
-                if leaving_local_guild is True:
-                    await ctx.send(_("Alright, I'll stay then. :)"))
-                else:
-                    if number > 1:
-                        await ctx.send(_("Alright, I'm not leaving those servers."))
-                    else:
-                        await ctx.send(_("Alright, I'm not leaving that server."))
+                await ctx.send(_("Alright, I'm not leaving that server."))
 
     @commands.command()
     @commands.is_owner()
@@ -2791,7 +2780,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         )
         try:
             pred = MessagePredicate.yes_or_no(ctx, user=ctx.author)
-            msg = await ctx.bot.wait_for("message", check=pred, timeout=30)
+            await ctx.bot.wait_for("message", check=pred, timeout=30)
         except asyncio.TimeoutError:
             await ctx.send(_("You took too long to respond."))
             return
@@ -2832,11 +2821,14 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         **Arguments:**
         - `[description]` - The description to use for this bot. Leave blank to reset to the default.
         """
+        # While the limit is 256, we bold it adding characters.
+        MAX_DESCRIPTION_LEN = 250
+
         if not description:
             await ctx.bot._config.description.clear()
             ctx.bot.description = "Red V3"
             await ctx.send(_("Description reset."))
-        elif len(description) > 250:  # While the limit is 256, we bold it adding characters.
+        elif len(description) > MAX_DESCRIPTION_LEN:
             await ctx.send(
                 _(
                     "This description is too long to properly display. "
@@ -2985,7 +2977,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
                     )
                 )
                 return
-            if len(username) > 32:
+            if len(username) > self.MAX_USERNAME_LEN:
                 await ctx.send(_("Failed to change name. Must be 32 characters or fewer."))
                 return
             async with ctx.typing():
@@ -3031,7 +3023,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         - `[nickname]` - The nickname to give the bot. Leave blank to clear the current nickname.
         """
         try:
-            if nickname and len(nickname) > 32:
+            if nickname and len(nickname) > self.MAX_USERNAME_LEN:
                 await ctx.send(_("Failed to change nickname. Must be 32 characters or fewer."))
                 return
             await ctx.guild.me.edit(nick=nickname)
@@ -5063,7 +5055,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         **Arguments:**
         - `<users_or_roles...>` - The users or roles to remove from the local allowlist.
         """
-        names = [getattr(u_or_r, "name", u_or_r) for u_or_r in users_or_roles]
+        [getattr(u_or_r, "name", u_or_r) for u_or_r in users_or_roles]
         uids = {getattr(u_or_r, "id", u_or_r) for u_or_r in users_or_roles}
         if not (ctx.guild.owner == ctx.author or await self.bot.is_owner(ctx.author)):
             current_whitelist = await self.bot.get_whitelist(ctx.guild)
@@ -5127,7 +5119,7 @@ class Core(commands.commands._RuleDropper, commands.Cog, CoreLogic):
         **Arguments:**
         - `<users_or_roles...>` - The users or roles to remove from the local allowlist.
         """
-        names = [getattr(u_or_r, "name", u_or_r) for u_or_r in users_or_roles]
+        [getattr(u_or_r, "name", u_or_r) for u_or_r in users_or_roles]
         uids = {getattr(u_or_r, "id", u_or_r) for u_or_r in users_or_roles}
         if not (ctx.guild.owner == ctx.author or await self.bot.is_owner(ctx.author)):
             current_whitelist = await self.bot.get_whitelist(ctx.guild)

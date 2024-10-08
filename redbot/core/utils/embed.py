@@ -1,6 +1,6 @@
-import discord
-
 import random
+
+import discord
 
 __all__ = ("randomize_colour", "randomize_color")
 

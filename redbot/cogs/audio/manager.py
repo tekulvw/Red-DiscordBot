@@ -9,8 +9,7 @@ import re
 import shlex
 import shutil
 import tempfile
-from typing import ClassVar, Final, List, Optional, Pattern, Tuple, Union, TYPE_CHECKING
-from typing_extensions import Self
+from typing import TYPE_CHECKING, ClassVar, Final, List, Optional, Pattern, Tuple, Union
 
 import aiohttp
 import lavalink
@@ -19,29 +18,28 @@ import yaml
 from discord.backoff import ExponentialBackoff
 from red_commons.logging import getLogger
 
-from redbot.core import data_manager, Config
+from redbot.core import Config, data_manager
 from redbot.core.i18n import Translator
 
 from . import managed_node
 from .errors import (
-    LavalinkDownloadFailed,
-    InvalidArchitectureException,
-    ManagedLavalinkAlreadyRunningException,
-    ManagedLavalinkPreviouslyShutdownException,
-    UnsupportedJavaException,
-    ManagedLavalinkStartFailure,
-    UnexpectedJavaResponseException,
     EarlyExitException,
+    InvalidArchitectureException,
+    LavalinkDownloadFailed,
+    ManagedLavalinkAlreadyRunningException,
     ManagedLavalinkNodeException,
-    NoProcessFound,
+    ManagedLavalinkPreviouslyShutdownException,
+    ManagedLavalinkStartFailure,
     NodeUnhealthy,
+    NoProcessFound,
+    UnexpectedJavaResponseException,
+    UnsupportedJavaException,
 )
-from .managed_node.ll_version import LAVALINK_BUILD_LINE, LavalinkVersion, LavalinkOldVersion
+from .managed_node.ll_version import LAVALINK_BUILD_LINE, LavalinkOldVersion, LavalinkVersion
 from .utils import (
     get_max_allocation_size,
     replace_p_with_prefix,
 )
-from ...core.utils import AsyncIter
 
 if TYPE_CHECKING:
     from . import Audio
@@ -211,13 +209,11 @@ class ServerManager:
                 )
             )
         try:
-            self._proc = (
-                await asyncio.subprocess.create_subprocess_exec(  # pylint:disable=no-member
-                    *args,
-                    cwd=str(self.lavalink_download_dir),
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.STDOUT,
-                )
+            self._proc = await asyncio.subprocess.create_subprocess_exec(  # pylint:disable=no-member
+                *args,
+                cwd=str(self.lavalink_download_dir),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT,
             )
             log.info("Managed Lavalink node started. PID: %s", self._proc.pid)
             try:
@@ -298,13 +294,11 @@ class ServerManager:
 
     async def _get_java_version(self) -> Tuple[int, int]:
         """This assumes we've already checked that java exists."""
-        _proc: asyncio.subprocess.Process = (
-            await asyncio.create_subprocess_exec(  # pylint:disable=no-member
-                self._java_exc,
-                "-version",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
+        _proc: asyncio.subprocess.Process = await asyncio.create_subprocess_exec(  # pylint:disable=no-member
+            self._java_exc,
+            "-version",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         # java -version outputs to stderr
         _, err = await _proc.communicate()

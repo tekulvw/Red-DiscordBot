@@ -1,12 +1,13 @@
 import random
+import weakref
 from collections import namedtuple
 from pathlib import Path
-import weakref
 
 import pytest
-from redbot.core import Config
+
+from redbot.core import Config, _drivers
+from redbot.core import config as config_module
 from redbot.core.bot import Red
-from redbot.core import config as config_module, _drivers
 
 __all__ = [
     "override_data_path",

@@ -3,15 +3,14 @@ from __future__ import annotations
 import contextlib
 import functools
 import io
-import os
 import logging
-import discord
-
-from pathlib import Path
-from typing import Callable, TYPE_CHECKING, Union, Dict, Optional, TypeVar
+import os
 from contextvars import ContextVar
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable, Dict, Optional, TypeVar, Union
 
 import babel.localedata
+import discord
 from babel.core import Locale
 
 if TYPE_CHECKING:
@@ -179,8 +178,8 @@ def _parse(translation_file: io.TextIOWrapper) -> Dict[str, str]:
 
     translations[locale] = {}
 
-    for line in translation_file:
-        line = line.strip()
+    for raw_line in translation_file:
+        line = raw_line.strip()
 
         if line.startswith(MSGID):
             # New msgid
@@ -355,8 +354,10 @@ def get_babel_regional_format(regional_format: Optional[str] = None) -> babel.co
 
 # This import to be down here to avoid circular import issues.
 # This will be cleaned up at a later date
+#
+# 6 years later: it's still here, not sure how this prevents circular imports
 # noinspection PyPep8
-from . import commands
+from . import commands  # noqa: E402
 
 _TypeT = TypeVar("_TypeT", bound=type)
 

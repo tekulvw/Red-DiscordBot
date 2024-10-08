@@ -1,4 +1,5 @@
 """Errors module for the app_commands package."""
+
 from discord import app_commands
 
 

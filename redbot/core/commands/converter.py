@@ -6,28 +6,32 @@ This module contains useful functions and classes for command argument conversio
 Some of the converters within are included `provisionally <developer-guarantees-exclusions>`
 and are marked as such.
 """
+
 import functools
 import math
 import re
 from datetime import timedelta
-from dateutil.relativedelta import relativedelta
 from typing import (
     TYPE_CHECKING,
-    Optional,
-    Optional as NoParseOptional,
-    Tuple,
-    List,
     Dict,
+    List,
+    Optional,
     Type,
     TypeVar,
+)
+from typing import (
+    Optional as NoParseOptional,
+)
+from typing import (
     Union as UserInputOptional,
 )
 
+from dateutil.relativedelta import relativedelta
 from discord.ext import commands as dpy_commands
 from discord.ext.commands import BadArgument
 
 from ..i18n import Translator
-from ..utils.chat_formatting import humanize_timedelta, humanize_list
+from ..utils.chat_formatting import humanize_timedelta
 
 if TYPE_CHECKING:
     from .context import Context
@@ -305,8 +309,9 @@ else:
 
 if TYPE_CHECKING:
 
-    def get_dict_converter(*expected_keys: str, delims: Optional[List[str]] = None) -> Type[dict]:
-        ...
+    def get_dict_converter(
+        *expected_keys: str, delims: Optional[List[str]] = None
+    ) -> Type[dict]: ...
 
 else:
 
@@ -392,8 +397,7 @@ if TYPE_CHECKING:
         maximum: Optional[timedelta] = None,
         minimum: Optional[timedelta] = timedelta(seconds=0),
         allowed_units: Optional[List[str]] = None,
-    ) -> Type[timedelta]:
-        ...
+    ) -> Type[timedelta]: ...
 
 else:
 

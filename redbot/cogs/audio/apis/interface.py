@@ -4,7 +4,6 @@ import datetime
 import json
 import random
 import time
-
 from collections import namedtuple
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, MutableMapping, Optional, Tuple, Union, cast
@@ -12,9 +11,9 @@ from typing import TYPE_CHECKING, Callable, List, MutableMapping, Optional, Tupl
 import aiohttp
 import discord
 import lavalink
+from lavalink.rest_api import LoadResult, LoadType
 from red_commons.logging import getLogger
 
-from lavalink.rest_api import LoadResult, LoadType
 from redbot.core import Config, commands
 from redbot.core.bot import Red
 from redbot.core.commands import Cog, Context
@@ -292,11 +291,10 @@ class AudioAPIInterface:
         if recursive is False:
             (call, params) = self.spotify_api.spotify_format_call(query_type, uri)
             results = await self.spotify_api.make_get_call(call, params)
+        elif isinstance(recursive, str):
+            results = await self.spotify_api.make_get_call(recursive, params)
         else:
-            if isinstance(recursive, str):
-                results = await self.spotify_api.make_get_call(recursive, params)
-            else:
-                results = {}
+            results = {}
         try:
             if results["error"]["status"] == 401 and not recursive:
                 raise SpotifyFetchError(
@@ -847,7 +845,7 @@ class AudioAPIInterface:
                     valid_global_entry = True
                 if valid_global_entry:
                     log.trace("Querying Global DB api for %r", query)
-                    results, called_api = results, False
+                    called_api = False
         if valid_global_entry:
             pass
         elif lazy is True:
